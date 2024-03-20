@@ -7,8 +7,11 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
- // Rigidbody of the player.
+// Rigidbody of the player;
  private Rigidbody rb; 
+
+ public CharacterController controller;
+ public Transform cam;
 
  // Variable to keep track of collected "PickUp" objects.
  private int count;
@@ -18,7 +21,7 @@ public class PlayerController : MonoBehaviour
  private float movementY;
 
  // Speed at which the player moves.
- public float speed = 0;
+ public float speed = 6f;
 
  // UI text component to display count of "PickUp" objects collected.
  public TextMeshProUGUI countText;
@@ -43,24 +46,35 @@ public class PlayerController : MonoBehaviour
     }
  
  // This function is called when a move input is detected.
- void OnMove(InputValue movementValue)
-    {
+ //void OnMove(InputValue movementValue)
+//    {
  // Convert the input value into a Vector2 for movement.
-        Vector2 movementVector = movementValue.Get<Vector2>();
+//        Vector2 movementVector = movementValue.Get<Vector2>();
 
  // Store the X and Y components of the movement.
-        movementX = movementVector.x; 
-        movementY = movementVector.y; 
-    }
+//        movementX = movementVector.x; 
+//        movementY = movementVector.y; 
+//    }
 
  // FixedUpdate is called once per fixed frame-rate frame.
- private void FixedUpdate() 
+ private void Update() 
     {
  // Create a 3D movement vector using the X and Y inputs.
-        Vector3 movement = new Vector3 (movementX, 0.0f, movementY);
+        float movementX = Input.GetAxisRaw("Horizontal");
+        float movementY = Input.GetAxisRaw("Vertical");
+        Vector3 movement = new Vector3 (movementX, 0f, movementY).normalized;
+
+        if (movement.magnitude >= 0.1f){
+              float targetAngle = Mathf.Atan2(movement.x, movement.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+              rb.rotation = Quaternion.Euler(0f, targetAngle, 0f);
+              //controller.Move(movement * speed * Time.deltaTime);
+
+              Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+              rb.AddForce(moveDirection.normalized * speed); 
+        }
 
  // Apply force to the Rigidbody to move the player.
-        rb.AddForce(movement * speed); 
+        
     }
 
  
