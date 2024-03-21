@@ -22,6 +22,13 @@ public class PlayerController : MonoBehaviour
 
  // Speed at which the player moves.
  public float speed = 6f;
+ public float jumpForce = 7f;
+
+ public LayerMask groundLayer;
+ public float raycastDistance = 0.6f;
+ private bool isGrounded;
+
+
 
  // UI text component to display count of "PickUp" objects collected.
  public TextMeshProUGUI countText;
@@ -62,16 +69,33 @@ public class PlayerController : MonoBehaviour
  // Create a 3D movement vector using the X and Y inputs.
         float movementX = Input.GetAxisRaw("Horizontal");
         float movementY = Input.GetAxisRaw("Vertical");
+        
         Vector3 movement = new Vector3 (movementX, 0f, movementY).normalized;
 
+
+
         if (movement.magnitude >= 0.1f){
-              float targetAngle = Mathf.Atan2(movement.x, movement.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-              rb.rotation = Quaternion.Euler(0f, targetAngle, 0f);
+              float targetAngle =  Mathf.Atan2(movement.x, movement.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+              rb.rotation =  Quaternion.Euler(0f, targetAngle, 0f);
               //controller.Move(movement * speed * Time.deltaTime);
 
               Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
               rb.AddForce(moveDirection.normalized * speed); 
         }
+
+        //Ground check
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, raycastDistance, groundLayer))
+            isGrounded = true;
+        else
+            isGrounded = false;
+ 
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded){
+              rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+
+       
 
  // Apply force to the Rigidbody to move the player.
         
@@ -92,6 +116,9 @@ public class PlayerController : MonoBehaviour
  // Update the count display.
             SetCountText();
         }
+
+
+        
     }
 
  // Function to update the displayed count of "PickUp" objects collected.
