@@ -9,12 +9,16 @@ public class PlayerController : MonoBehaviour
 {
 // Rigidbody of the player;
  private Rigidbody rb; 
+ private AudioClip tokenSound;
+ private AudioSource audioSource;
 
  public CharacterController controller;
+ public GameObject player;
  public Transform cam;
 
  // Variable to keep track of collected "PickUp" objects.
  private int count;
+ private int life;
 
  // Movement along X and Y axes.
  private float movementX;
@@ -32,6 +36,7 @@ public class PlayerController : MonoBehaviour
 
  // UI text component to display count of "PickUp" objects collected.
  public TextMeshProUGUI countText;
+  public TextMeshProUGUI lifeText;
 
  // UI object to display winning text.
  public GameObject winTextObject;
@@ -42,8 +47,12 @@ public class PlayerController : MonoBehaviour
  // Get and store the Rigidbody component attached to the player.
         rb = GetComponent<Rigidbody>();
 
+        audioSource = GetComponent<AudioSource>();
+
  // Initialize count to zero.
         count = 0;
+        life = 3;
+        lifeText.text = "Life: " + life.ToString();
 
  // Update the count display.
         SetCountText();
@@ -95,6 +104,18 @@ public class PlayerController : MonoBehaviour
               rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
+        if (this.transform.position.y < -1 ){
+              transform.position = new Vector3(0f,0.5f,-6.5f);
+              life = life - 1;
+              if (life == -1){
+                Application.Quit();
+                
+                Debug.Log("Quit");     
+              }
+              SetLivesText();
+              
+        }
+
        
 
  // Apply force to the Rigidbody to move the player.
@@ -115,6 +136,10 @@ public class PlayerController : MonoBehaviour
 
  // Update the count display.
             SetCountText();
+
+            audioSource.clip = tokenSound;
+       audioSource.Play();
+            CollectToken();
         }
 
 
@@ -134,4 +159,20 @@ public class PlayerController : MonoBehaviour
             winTextObject.SetActive(true);
         }
     }
+
+
+
+ void SetLivesText(){
+       lifeText.text = "Life: " + life.ToString();
+              //Debug.Log("life");
+ } 
+
+ void CollectToken(){
+
+       Debug.Log("token sound");
+
+       audioSource.clip = tokenSound;
+       audioSource.Play();
+
+ }
 }
